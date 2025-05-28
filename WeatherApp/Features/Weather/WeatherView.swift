@@ -14,11 +14,11 @@ struct WeatherView: View {
     var body: some View {
         WithViewStore(self.store, observe: { $0 }) { viewStore in
             VStack(spacing: 16) {
-                TextField("都市名を入力", text: viewStore.binding(get: \.city, send: WeatherFeature.Action.cityChanged))
+                TextField("도시명을 영어로 입력하세요", text: viewStore.binding(get: \.city, send: WeatherFeature.Action.cityChanged))
                     .textFieldStyle(.roundedBorder)
                     .padding()
 
-                Button("取得") {
+                Button("취득") {
                     viewStore.send(.fetchButtonTapped)
                 }
                 .disabled(viewStore.isLoading)
@@ -27,9 +27,9 @@ struct WeatherView: View {
                     ProgressView()
                 } else if let weather = viewStore.weather {
                     VStack(spacing: 8) {
-                        Text("都市: \(weather.name)")
-                        Text("気温: \(weather.main.temp, specifier: "%.1f") ℃")
-                        Text("天気: \(weather.weather.first?.description ?? "不明")")
+                        Text("도시: \(weather.name)")
+                        Text("기온: \(weather.main.temp, specifier: "%.1f") ℃")
+                        Text("날씨: \(weather.weather.first?.description ?? "불명")")
                     }
                 }
             }
