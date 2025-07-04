@@ -10,18 +10,38 @@ import ComposableArchitecture
 
 struct WeatherView: View {
     let store: StoreOf<WeatherFeature>
+    
+    let seoulId = 1835847
+    let tokyoId = 1850147
+    let osakaId = 1853908
+    let fukuokaId = 1863967
 
     var body: some View {
         WithViewStore(self.store, observe: { $0 }) { viewStore in
             VStack(spacing: 16) {
-                TextField("도시명을 영어로 입력하세요", text: viewStore.binding(get: \.city, send: WeatherFeature.Action.cityChanged))
-                    .textFieldStyle(.roundedBorder)
-                    .padding()
-
-                Button("취득") {
-                    viewStore.send(.fetchButtonTapped)
+                Button("서울") {
+                    viewStore.send(.cityButtonTouched(seoulId))
                 }
-                .disabled(viewStore.isLoading)
+                Button("도쿄") {
+                    viewStore.send(.cityButtonTouched(tokyoId))
+                }
+                Button("오사카") {
+                    viewStore.send(.cityButtonTouched(osakaId))
+                }
+                Button("후쿠오카") {
+                    viewStore.send(.cityButtonTouched(fukuokaId))
+                }
+                
+                HStack(spacing: 8) {
+                    TextField("or 도시명을 영어로 입력하세요", text: viewStore.binding(get: \.city, send: WeatherFeature.Action.cityChanged))
+                        .textFieldStyle(.roundedBorder)
+//                        .padding()
+
+                    Button("취득") {
+                        viewStore.send(.fetchButtonTapped)
+                    }
+                    .disabled(viewStore.isLoading)
+                }
 
                 if viewStore.isLoading {
                     ProgressView()
@@ -33,6 +53,7 @@ struct WeatherView: View {
                     }
                 }
             }
+            .padding(16)
             .alert(
               store: self.store.scope(
                 state: \.$alert,                     // ← $つき

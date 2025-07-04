@@ -10,6 +10,7 @@ import SwiftUI
 
 struct WeatherFeature: Reducer {
     struct State: Equatable {
+        var cityId: Int?
         var city: String = ""
         var weather: WeatherResponse?
         var isLoading: Bool = false
@@ -17,6 +18,7 @@ struct WeatherFeature: Reducer {
     }
     
     enum Action: Equatable {
+        case cityButtonTouched(Int)
         case cityChanged(String)
         case fetchButtonTapped
         case fetchWeatherResponse(Result<WeatherResponse, WeatherError>)
@@ -38,6 +40,25 @@ struct WeatherFeature: Reducer {
     
     func reduce(into state: inout State, action: Action) -> Effect<Action> {
         switch action {
+        case let .cityButtonTouched(cityId):
+            state.cityId = cityId
+            state.isLoading = true
+            state.weather = nil
+            return .run { send in
+                do {
+                    let weather = try await self.weatherClient.fetchWeatherById(cityId)
+                    await send(.fetchWeatherResponse(.success(weather)))
+                } catch {
+                    let weatherError: WeatherError
+                    if error is DecodingError {
+                        weatherError = .decodingError
+                    } else {
+                        weatherError = .networkError(error.localizedDescription)
+                    }
+                    await send(.fetchWeatherResponse(.failure(weatherError)))
+                }
+            }
+            
         case let .cityChanged(city):
             state.city = city
             return .none
@@ -51,7 +72,7 @@ struct WeatherFeature: Reducer {
                     await send(.fetchWeatherResponse(.success(weather)))
                 } catch {
                     let weatherError: WeatherError
-                    if let decodingError = error as? DecodingError {
+                    if error is DecodingError {
                         weatherError = .decodingError
                     } else {
                         weatherError = .networkError(error.localizedDescription)
